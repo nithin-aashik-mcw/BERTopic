@@ -132,7 +132,28 @@ def test_topic_reduction(model, reduced_topics, documents, request):
     assert len(old_freq.Topic.unique()) == len(old_freq)
     assert len(new_freq.Topic.unique()) == len(new_freq)
     assert len(topic_model.topics_) == len(old_topics)
-    assert topic_model.topics_ != old_topics
+
+    # Reduction only happens if there are more topics than requested
+    if len(old_freq) > reduced_topics:
+        assert topic_model.topics_ != old_topics
+    else:
+        assert topic_model.topics_ == old_topics
+
+    if topic_model.probabilities_ is not None and topic_model.probabilities_.ndim == 2:
+        assert topic_model.probabilities_.shape[1] == len(set(topic_model.topics_)) - topic_model._outliers
+
+
+@pytest.mark.parametrize("model", [("reduced_topic_model"), ("merged_topic_model")])
+def test_topic_reduction_no_op(model, documents, request):
+    """Reducing to more topics than exist should leave the model untouched."""
+    topic_model = copy.deepcopy(request.getfixturevalue(model))
+    old_topics = copy.deepcopy(topic_model.topics_)
+    old_probabilities = copy.deepcopy(topic_model.probabilities_)
+
+    topic_model.reduce_topics(documents, nr_topics=len(topic_model.get_topics()) + 1)
+
+    assert topic_model.topics_ == old_topics
+    np.testing.assert_array_equal(topic_model.probabilities_, old_probabilities)
 
 
 @pytest.mark.parametrize(
