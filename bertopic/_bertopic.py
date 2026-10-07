@@ -2370,10 +2370,15 @@ class BERTopic:
         )
 
         # Reduce number of topics
+        nr_mappings = len(self.topic_mapper_.mappings_[0])
         documents = self._reduce_topics(documents, use_ctfidf)
         self._merged_topics = None
         self._save_representative_docs(documents)
-        self.probabilities_ = self._map_probabilities(self.probabilities_)
+
+        # Only map probabilities if topics were actually reduced, otherwise
+        # the most recent mappings belong to a previous reduction step
+        if len(self.topic_mapper_.mappings_[0]) > nr_mappings:
+            self.probabilities_ = self._map_probabilities(self.probabilities_)
 
         return self
 
