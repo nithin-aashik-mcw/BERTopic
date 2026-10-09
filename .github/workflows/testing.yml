@@ -37,12 +37,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v7
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v7
-      with:
-        python-version: ${{ matrix.python-version }}
-        architecture: ${{ matrix.platform == 'windows-11-arm' && 'arm64' || 'x64' }}
-    - name: Install latest version of uv
+    - name: Install latest version of uv and set up Python ${{ matrix.python-version }}
       uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       with:
         python-version: ${{ matrix.python-version }}
